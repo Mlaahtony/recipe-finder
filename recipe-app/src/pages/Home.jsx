@@ -1,53 +1,68 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fetchRecipes } from '../services/api';
-import RecipeCard from '../components/RecipeCard';
+import FilterPanel from '../components/FilterPanel';
+import RecipeList from '../components/RecipeList';
 
 function Home() {
-  const [recipes, setRecipes] = useState([]);
   const [query, setQuery] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [recipes, setRecipes] = useState([]);
+  const [filters, setFilters] = useState({ cuisine: '', diet: '' });
+  const [favorites, setFavorites] = useState([]);
 
-  const handleSearch = async (event) => {
-    event.preventDefault();
-    setLoading(true);
-    const data = await fetchRecipes(query);
-    setRecipes(data);
-    setLoading(false);
+  useEffect(() => {
+    const savedFavorites = JSON.parse(localStorage.getItem('favorites')) || [];
+    setFavorites(savedFavorites);
+  }, []);
+
+  const handleFilterChange = (filter) => {
+    setFilters((prevFilters) => ({
+      ...prevFilters,
+      [filter.type]: filter.value,
+    }));
+  };
+
+  const handleSearch = async () => {
+    if (!query && !filters.cuisine && !filters.diet) return;
+    const recipeResults = await fetchRecipes(query, filters);
+    setRecipes(recipeResults);
+  };
+
+  const handleToggleFavorite = (recipe) => {
+    const isFavorite = favorites.some((fav) => fav.id === recipe.id);
+    let updatedFavorites;
+
+    if (isFavorite) {
+      updatedFavorites = favorites.filter((fav) => fav.id !== recipe.id);
+    } else {
+      updatedFavorites = [...favorites, recipe];
+    }
+
+    setFavorites(updatedFavorites);
+    localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
   };
 
   return (
-    <div>
-      <h1 className="text-3xl mb-4">Recipe Finder</h1>
-
-      <form onSubmit={handleSearch} className="mb-4">
+    <div className="home">
+      <h1>Search for Recipes</h1>
+      <div className="search-bar">
         <input
           type="text"
-          name="search"
-          placeholder="Search for recipes"
+          placeholder="Enter ingredients or dish name"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="p-2 border border-gray-300 rounded"
+          className="search-input"
         />
-        <button type="submit" className="p-2 bg-blue-500 text-white rounded ml-2">
+        <button onClick={handleSearch} className="search-button">
           Search
         </button>
-      </form>
-
-      {loading && <p>Loading...</p>}
-
-      <div className="recipe-list grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-        {recipes.length > 0 ? (
-          recipes.map((recipe) => (
-            <RecipeCard key={recipe.id} recipe={recipe} />
-          ))
-        ) : (
-          <p>No recipes found.</p>
-        )}
       </div>
+      <FilterPanel onFilterChange={handleFilterChange} />
+      <RecipeList recipes={recipes} favorites={favorites} onToggleFavorite={handleToggleFavorite} />
     </div>
   );
 }
-
 export default Home;
+
+
 
   

@@ -1,9 +1,10 @@
+import React from 'react';
 import { Link } from 'react-router-dom';
 
 function NavBar() {
   return (
-    <nav className="bg-blue-600 p-4">
-      <ul className="flex space-x-4 text-white">
+    <nav>
+      <ul>
         <li>
           <Link to="/">Home</Link>
         </li>
@@ -14,5 +15,5 @@ function NavBar() {
     </nav>
   );
 }
-
 export default NavBar;
+
