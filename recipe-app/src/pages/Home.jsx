@@ -29,39 +29,54 @@ function Home() {
 
   const handleToggleFavorite = (recipe) => {
     const isFavorite = favorites.some((fav) => fav.id === recipe.id);
-    let updatedFavorites;
-
-    if (isFavorite) {
-      updatedFavorites = favorites.filter((fav) => fav.id !== recipe.id);
-    } else {
-      updatedFavorites = [...favorites, recipe];
-    }
+    const updatedFavorites = isFavorite
+      ? favorites.filter((fav) => fav.id !== recipe.id)
+      : [...favorites, recipe];
 
     setFavorites(updatedFavorites);
     localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
   };
 
   return (
-    <div className="home">
-      <h1>Search for Recipes</h1>
-      <div className="search-bar">
+    <div className="bg-white text-black p-4">
+      <h1 className="text-2xl font-bold mb-4">Search for Recipes</h1>
+
+      <div className="flex items-center space-x-2 mb-4">
         <input
           type="text"
-          placeholder="Enter ingredients or dish name"
+          placeholder="Search recipes"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="search-input"
+          className="border border-gray-300 p-2 flex-1 rounded"
         />
-        <button onClick={handleSearch} className="search-button">
+        <button
+          onClick={handleSearch}
+          className="bg-orange-500 text-white px-4 py-2 rounded w-28"
+        >
           Search
         </button>
       </div>
-      <FilterPanel onFilterChange={handleFilterChange} />
-      <RecipeList recipes={recipes} favorites={favorites} onToggleFavorite={handleToggleFavorite} />
+
+      <div className="flex space-x-4 mb-6">
+        <div className="w-1/2">
+          <FilterPanel onFilterChange={handleFilterChange} filterType="cuisine" />
+        </div>
+        <div className="w-1/2">
+          <FilterPanel onFilterChange={handleFilterChange} filterType="diet" />
+        </div>
+      </div>
+
+      <RecipeList
+        recipes={recipes}
+        favorites={favorites}
+        onToggleFavorite={handleToggleFavorite}
+      />
     </div>
   );
 }
+
 export default Home;
+
 
 
 
